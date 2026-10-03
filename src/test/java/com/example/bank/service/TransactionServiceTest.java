@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class TransactionServiceTest {
@@ -216,5 +215,47 @@ public class TransactionServiceTest {
                         BigDecimal.ZERO
                 )
         );
+    }
+
+    @Test
+    void shouldNotModifyEitherAccountWhenTransferFails() {
+
+        UUID sourceId = UUID.randomUUID();
+        UUID destinationId = UUID.randomUUID();
+
+        Account source = new Account(sourceId);
+        Account destination = new Account(destinationId);
+
+        source.deposit(new BigDecimal("50.00"));
+
+        when(accountService.getAccount(sourceId))
+                .thenReturn(source);
+
+        when(accountService.getAccount(destinationId))
+                .thenReturn(destination);
+
+        assertThrows(
+                InsufficientFundsException.class,
+                () -> service.transfer(
+                        sourceId,
+                        destinationId,
+                        new BigDecimal("100.00")
+                )
+        );
+
+        assertEquals(
+                0,
+                source.getBalance()
+                        .compareTo(new BigDecimal("50.00"))
+        );
+
+        assertEquals(
+                0,
+                destination.getBalance()
+                        .compareTo(BigDecimal.ZERO)
+        );
+
+        assertEquals(1, source.getTransactions().size());
+        assertTrue(destination.getTransactions().isEmpty());
     }
 }
