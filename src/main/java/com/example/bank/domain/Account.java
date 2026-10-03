@@ -64,4 +64,30 @@ public class Account {
             throw new InvalidAmountException();
         }
     }
+
+    public void transferOut(BigDecimal amount) {
+
+        validateAmount(amount);
+
+        if (balance.compareTo(amount) < 0) {
+            throw new InsufficientFundsException();
+        }
+
+        balance = balance.subtract(amount);
+
+        transactions.add(
+                Transaction.transferOut(amount)
+        );
+    }
+
+    public void transferIn(BigDecimal amount) {
+
+        validateAmount(amount);
+
+        balance = balance.add(amount);
+
+        transactions.add(
+                Transaction.transferIn(amount)
+        );
+    }
 }

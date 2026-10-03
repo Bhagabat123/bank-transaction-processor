@@ -43,4 +43,16 @@ public class TransactionController {
                 request.amount()
         );
     }
+
+    @PostMapping("/transfers")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void transfer(
+            @Valid @RequestBody TransferRequest request) {
+
+        transactionService.transfer(
+                request.fromAccountId(),
+                request.toAccountId(),
+                request.amount()
+        );
+    }
 }
