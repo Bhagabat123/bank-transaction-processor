@@ -5,6 +5,7 @@ import com.example.bank.exception.InvalidAmountException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,6 +126,111 @@ public class AccountTest {
         assertThrows(
                 InvalidAmountException.class,
                 () -> account.withdraw(new BigDecimal("-10.00"))
+        );
+    }
+
+    @Test
+    void shouldRecordDepositTransaction() {
+
+        Account account = new Account(UUID.randomUUID());
+
+        account.deposit(new BigDecimal("100.00"));
+
+        assertEquals(1, account.getTransactions().size());
+
+        Transaction transaction =
+                account.getTransactions().get(0);
+
+        assertEquals(
+                TransactionType.DEPOSIT,
+                transaction.type()
+        );
+
+        assertEquals(
+                new BigDecimal("100.00"),
+                transaction.amount()
+        );
+
+        assertNotNull(transaction.id());
+        assertNotNull(transaction.timestamp());
+    }
+
+    @Test
+    void shouldRecordWithdrawalTransaction() {
+
+        Account account = new Account(UUID.randomUUID());
+
+        account.deposit(new BigDecimal("100.00"));
+        account.withdraw(new BigDecimal("40.00"));
+
+        assertEquals(2, account.getTransactions().size());
+
+        Transaction transaction =
+                account.getTransactions().get(1);
+
+        assertEquals(
+                TransactionType.WITHDRAWAL,
+                transaction.type()
+        );
+
+        assertEquals(
+                new BigDecimal("40.00"),
+                transaction.amount()
+        );
+
+        assertNotNull(transaction.timestamp());
+    }
+
+    @Test
+    void shouldNotRecordFailedWithdrawal() {
+
+        Account account = new Account(UUID.randomUUID());
+
+        account.deposit(new BigDecimal("100.00"));
+
+        assertThrows(
+                InsufficientFundsException.class,
+                () -> account.withdraw(new BigDecimal("150.00"))
+        );
+
+        assertEquals(
+                1,
+                account.getTransactions().size()
+        );
+
+        assertEquals(
+                TransactionType.DEPOSIT,
+                account.getTransactions().get(0).type()
+        );
+    }
+
+    @Test
+    void shouldMaintainTransactionHistoryOrder() {
+
+        Account account = new Account(UUID.randomUUID());
+
+        account.deposit(new BigDecimal("100.00"));
+        account.withdraw(new BigDecimal("30.00"));
+        account.deposit(new BigDecimal("50.00"));
+
+        List<Transaction> transactions =
+                account.getTransactions();
+
+        assertEquals(3, transactions.size());
+
+        assertEquals(
+                TransactionType.DEPOSIT,
+                transactions.get(0).type()
+        );
+
+        assertEquals(
+                TransactionType.WITHDRAWAL,
+                transactions.get(1).type()
+        );
+
+        assertEquals(
+                TransactionType.DEPOSIT,
+                transactions.get(2).type()
         );
     }
 }

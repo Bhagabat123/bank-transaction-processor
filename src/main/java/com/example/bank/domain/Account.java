@@ -12,10 +12,12 @@ public class Account {
 
     private final UUID id;
     private BigDecimal balance;
+    private final List<Transaction> transactions;
 
     public Account(UUID id) {
         this.id = id;
         this.balance = BigDecimal.ZERO;
+        this.transactions = new ArrayList<>();
     }
 
     public UUID getId() {
@@ -26,10 +28,19 @@ public class Account {
         return balance;
     }
 
+    //List.copyOf() gives callers an unmodifiable snapshot.
+    public List<Transaction> getTransactions() {
+        return List.copyOf(transactions);
+    }
+
     public void deposit(BigDecimal amount) {
         validateAmount(amount);
 
         balance = balance.add(amount);
+
+        transactions.add(
+                Transaction.deposit(amount)
+        );
     }
 
     public void withdraw(BigDecimal amount) {
@@ -40,6 +51,10 @@ public class Account {
         }
 
         balance = balance.subtract(amount);
+
+        transactions.add(
+                Transaction.withdrawal(amount)
+        );
     }
 
     private void validateAmount(BigDecimal amount) {
