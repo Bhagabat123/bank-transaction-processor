@@ -65,16 +65,6 @@ Create account
 
 POST /accounts
 
-Response:
-
-```json
-{
-  "id": "account-id",
-  "balance": 0
-}
-```json
-
-
 **Get balance**
 
 GET /accounts/{accountId}/balance
