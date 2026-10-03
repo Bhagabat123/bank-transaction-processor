@@ -72,6 +72,8 @@ Response:
   "id": "account-id",
   "balance": 0
 }
+```json
+
 
 **Get balance**
 
